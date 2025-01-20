@@ -1,0 +1,10 @@
+./dataset/facedata/processed/chinhung/chinhung_9.png 326 166 529 427
+./dataset/facedata/processed/chinhung/chinhung_3.png 319 169 521 422
+./dataset/facedata/processed/chinhung/chinhung_0.png 318 172 517 419
+./dataset/facedata/processed/chinhung/chinhung_5.png 310 161 513 424
+./dataset/facedata/processed/chinhung/chinhung_8.png 342 169 534 418
+./dataset/facedata/processed/chinhung/chinhung_7.png 310 158 522 426
+./dataset/facedata/processed/chinhung/chinhung_6.png 323 165 522 418
+./dataset/facedata/processed/chinhung/chinhung_4.png 328 172 526 420
+./dataset/facedata/processed/chinhung/chinhung_2.png 323 171 523 420
+./dataset/facedata/processed/chinhung/chinhung_1.png 318 170 518 418

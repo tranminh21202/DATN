@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='register.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <h1 class="title">Hệ thống xác thực khuôn mặt</h1>
+    
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form id="registerForm" action="/register" method="POST">
+        <h1>Đăng ký</h1>
+        <label for="username">Tên người dùng:</label>
+        <input type="text" id="username" name="username" required>
+        <button type="button" id="captureButton">Chụp ảnh</button>
+        <input type="submit" value="Đăng ký" disabled id="registerButton">
+    </form>
+
+    <p id="statusMessage">Ready to capture photos</p>
+
+    <script>
+        $("#captureButton").click(function() {
+            let username = $("#username").val();
+            if (username) {
+                // Mở cửa sổ camera và chụp ảnh
+                let video = document.createElement("video");
+                document.body.appendChild(video);
+                let constraints = { video: true };
+
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                        video.play();
+
+                        let count = 0;
+                        $("#statusMessage").text(`Capturing photo ${count + 1} of 100...`);
+                        let interval = setInterval(function() {
+                            if (count < 100) {
+                                captureImage(video, username, count);
+                                count++;
+                                $("#statusMessage").text(`Captured photo ${count} of 100`);
+                            } else {
+                                clearInterval(interval);
+                                stream.getTracks().forEach(track => track.stop()); // Dừng camera
+                                video.remove(); 
+                                $("#registerButton").prop("disabled", false); // Kích hoạt nút register
+                            }
+                        }, 100); // Chụp mỗi giây
+                    })
+                    .catch(function(err) {
+                        console.error("Error accessing the camera: ", err);
+                    });
+            } else {
+                alert("Please enter a username.");
+            }
+        });
+
+        function captureImage(video, username, count) {
+            let canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0);
+            let dataURL = canvas.toDataURL("image/jpeg");
+            
+            // Gửi ảnh đến server
+            $.ajax({
+                type: "POST",
+                url: "/save_image", // URL mới cho việc lưu ảnh
+                data: {
+                    image: dataURL,
+                    username: username,
+                    count: count
+                }
+            });
+        }
+    </script>
+</body>
+</html>

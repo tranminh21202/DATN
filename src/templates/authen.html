@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác thực khuôn mặt</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='authen.css') }}">
+</head>
+<body>
+    <h2>Xác thực khuôn mặt</h2>
+
+    <!-- Form xác thực với cả chức năng tải file và chụp ảnh -->
+    <form id="authenForm" method="POST" enctype="multipart/form-data" action="/authen">
+        <label for="imageFile">Tải lên ảnh để xác thực:</label>
+        <input type="file" id="imageFile" name="image" accept="image/*">
+        <!-- <button type="submit">Xác thực từ file</button> -->
+        <button type="button" id="uploadButton">Xác thực từ file</button>
+        
+        <button type="button" id="captureButton">Chụp ảnh</button>
+        <video id="camera" width="320" height="240" autoplay style="display: none;"></video>
+        <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+        <img id="capturedImage" alt="Ảnh đã chụp" style="display: none; max-width: 320px; max-height: 240px;"/>
+
+        <!-- Nút xác thực ảnh đã chụp -->
+        <button type="button" id="verifyButton" disabled>Xác thực ảnh chụp</button>
+        <input type="hidden" id="capturedImageData" name="capturedImageData">
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        const captureButton = document.getElementById('captureButton');
+        const uploadButton = document.getElementById('uploadButton');
+        const camera = document.getElementById('camera');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('capturedImage');
+        const authenForm = document.getElementById('authenForm');
+        const verifyButton = document.getElementById('verifyButton');
+        const capturedImageData = document.getElementById('capturedImageData');
+
+        let isCameraOpen = false;
+
+        // Xử lý khi nhấn nút "Chụp ảnh"
+        captureButton.addEventListener('click', () => {
+            if (!isCameraOpen) {
+                // Lần đầu nhấn, mở camera
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        camera.style.display = 'block';
+                        camera.srcObject = stream;
+                        camera.play(); // Bắt đầu phát video
+                        captureButton.textContent = 'Chụp ảnh'; // Đổi nội dung nút
+                        isCameraOpen = true; // Đánh dấu camera đang mở
+                    })
+                    .catch(error => console.error('Lỗi khi mở camera:', error));
+            } else {
+                // Lần nhấn thứ hai, chụp ảnh
+                const context = canvas.getContext('2d');
+                context.drawImage(camera, 0, 0, canvas.width, canvas.height);
+
+                // Lưu ảnh đã chụp và hiển thị
+                const dataURL = canvas.toDataURL('image/png');
+                capturedImage.src = dataURL;
+                capturedImage.style.display = 'block';
+                verifyButton.disabled = false; // Kích hoạt nút xác thực
+                capturedImageData.value = dataURL;
+
+                // Tắt camera
+                camera.srcObject.getTracks().forEach(track => track.stop());
+                camera.style.display = 'none'; // Ẩn camera
+                captureButton.textContent = 'Mở lại camera'; // Đổi nội dung nút
+                isCameraOpen = false; // Đánh dấu camera đã tắt
+            }
+        });
+
+        // Xử lý khi nhấn nút "Xác thực từ file"
+        uploadButton.addEventListener('click', () => {
+            const imageFileInput = document.getElementById('imageFile');
+            const file = imageFileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    capturedImageData.value = reader.result; // Chuyển file sang base64 và gán vào input ẩn
+                    authenForm.submit(); // Gửi form
+                };
+                reader.readAsDataURL(file); // Đọc file dưới dạng base64
+            } else {
+                alert('Vui lòng chọn một file ảnh trước khi xác thực.');
+            }
+        });
+
+        // Submit form khi nhấn "Xác thực ảnh chụp" với ảnh đã chụp từ camera
+        verifyButton.addEventListener('click', () => {
+            authenForm.submit();
+        });
+    </script>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        // Lấy các phần tử modal
+        const modal = document.getElementById('resultModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalMessage = document.getElementById('modalMessage');
+
+        // Hàm hiển thị modal với thông báo
+        function showModal(message) {
+            modalMessage.textContent = message;
+            modal.style.display = 'block';
+        }
+
+        // Đóng modal khi nhấn "X"
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Đóng modal khi click ngoài modal
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Kiểm tra dữ liệu từ server và hiển thị modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const message = "{{ message }}"; // Biến từ server trả về
+            if (message) {
+                showModal(message);
+            }
+        });
+    </script>
+</body>
+</html>

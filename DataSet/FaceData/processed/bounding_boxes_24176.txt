@@ -1,0 +1,10 @@
+Dataset/FaceData/processed/hien/IMG_6012.png 218 239 743 957
+Dataset/FaceData/processed/hien/IMG_6300.png 49 227 704 1103
+Dataset/FaceData/processed/hien/IMG_6293.png 190 149 700 852
+Dataset/FaceData/processed/hien/IMG_6481.png 12 130 901 1342
+Dataset/FaceData/processed/hien/IMG_6495.png 301 338 959 1213
+Dataset/FaceData/processed/minh/IMG_8704.png 290 537 717 1051
+Dataset/FaceData/processed/minh/IMG_8701.png 656 597 1232 1282
+Dataset/FaceData/processed/minh/IMG_8702.png 299 653 906 1357
+Dataset/FaceData/processed/minh/IMG_8700.png 774 415 1177 941
+Dataset/FaceData/processed/minh/IMG_8703.png 558 833 754 1075
